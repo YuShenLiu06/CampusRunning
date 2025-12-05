@@ -1,0 +1,30 @@
+# 排除输出目录
+output/
+wgs84_test_output/
+
+# 排除Python缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 排除虚拟环境
+venv/
+env/
+ENV/
+
+# 排除IDE配置文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 排除系统文件
+.DS_Store
+Thumbs.db
+
+# 排除日志文件
+*.log
+
+# 排除临时文件
+*.tmp
+*.temp

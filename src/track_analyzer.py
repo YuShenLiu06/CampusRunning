@@ -150,27 +150,3 @@ class TrackAnalyzer:
             area -= coordinates[j][0] * coordinates[i][1]
         
         return area < 0
-    
-    def print_analysis(self):
-        """打印轨迹分析结果"""
-        analysis = self.analyze_track()
-        
-        print("=== 操场轨迹分析结果 ===")
-        print(f"轨迹点数量: {analysis['num_points']}")
-        print(f"总距离: {analysis['total_distance_meters']:.2f} 米 ({analysis['total_distance_km']} 公里)")
-        print(f"近似半径: {analysis['approximate_radius_meters']:.2f} 米")
-        print(f"中心点: ({analysis['center'][0]:.8f}, {analysis['center'][1]:.8f})")
-        print(f"方向: {'顺时针' if analysis['is_clockwise'] else '逆时针'}")
-        
-        print("\n各段距离（米）:")
-        for i, distance in enumerate(analysis['segment_distances']):
-            print(f"  段 {i+1}: {distance:.2f} 米")
-        
-        print("\n原始坐标点:")
-        for i, (lon, lat) in enumerate(analysis['coordinates']):
-            print(f"  点 {i+1}: ({lon:.8f}, {lat:.8f})")
-
-
-if __name__ == "__main__":
-    analyzer = TrackAnalyzer()
-    analyzer.print_analysis()

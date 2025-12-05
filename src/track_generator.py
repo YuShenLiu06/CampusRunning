@@ -16,13 +16,14 @@ import math
 import random
 import datetime
 from typing import List, Tuple
-from track_analyzer import TrackAnalyzer
+from .track_analyzer import TrackAnalyzer
+from .coordinate_corrector import CoordinateCorrector
 
 
 class TrackGenerator:
     """轨迹生成器类"""
     
-    def __init__(self):
+    def __init__(self, apply_correction: bool = True):
         self.analyzer = TrackAnalyzer()
         self.base_analysis = self.analyzer.analyze_track()
         
@@ -35,6 +36,16 @@ class TrackGenerator:
         # 随机性参数
         self.max_deviation = 2.0  # 最大偏离距离（米）
         self.smooth_factor = 0.3  # 光滑因子
+        
+        # 坐标修正器
+        self.apply_correction = apply_correction
+        if apply_correction:
+            self.corrector = CoordinateCorrector()
+            # 应用修正到基础轨迹
+            self.base_track = self.corrector.correct_coordinates(self.base_track)
+            # 更新中心点
+            self.center = self.corrector.correct_coordinate(self.center[0], self.center[1])
+            print("坐标修正已应用到基础轨迹")
         
     def generate_smooth_track(self, target_distance_km: float, 
                              points_per_km: int = 50,
@@ -251,13 +262,13 @@ class TrackGenerator:
         return smoothed_points
     
     def generate_tcx_trackpoints(self, track_points: List[Tuple[float, float]], 
-                                start_time: str, duration_seconds: float) -> List[dict]:
+                                start_time: datetime.datetime, duration_seconds: float) -> List[dict]:
         """
         生成TCX格式的轨迹点
         
         Args:
             track_points: 轨迹点列表
-            start_time: 开始时间（ISO格式）
+            start_time: 开始时间（datetime对象）
             duration_seconds: 总时长（秒）
             
         Returns:
@@ -270,12 +281,12 @@ class TrackGenerator:
         time_interval = duration_seconds / len(track_points)
         
         trackpoints = []
-        start_datetime = start_time
         
         for i, (lon, lat) in enumerate(track_points):
             # 计算当前点的时间
-            point_time = start_datetime + datetime.timedelta(seconds=i * time_interval)
-            point_time_str = point_time.strftime("%Y-%m-%dT%H:%M:%SZ")
+            point_time = start_time + datetime.timedelta(seconds=i * time_interval)
+            # 使用本地时间，不加Z后缀
+            point_time_str = point_time.strftime("%Y-%m-%dT%H:%M:%S")
             
             # 计算海拔（模拟值，基于到中心的距离）
             distance_to_center = self.analyzer.calculate_distance(self.center, (lon, lat))
@@ -292,29 +303,3 @@ class TrackGenerator:
             trackpoints.append(trackpoint)
         
         return trackpoints
-
-
-if __name__ == "__main__":
-    import datetime
-    
-    # 测试轨迹生成器
-    generator = TrackGenerator()
-    
-    # 生成3公里的轨迹
-    track_points = generator.generate_smooth_track(3.0)
-    
-    print(f"生成了 {len(track_points)} 个轨迹点")
-    print("前5个点:")
-    for i, point in enumerate(track_points[:5]):
-        print(f"  点 {i+1}: ({point[0]:.8f}, {point[1]:.8f})")
-    
-    # 生成TCX轨迹点
-    start_time = datetime.datetime.now()
-    duration = 1800  # 30分钟
-    
-    tcx_points = generator.generate_tcx_trackpoints(track_points, start_time, duration)
-    
-    print(f"\n生成了 {len(tcx_points)} 个TCX轨迹点")
-    print("前3个TCX点:")
-    for i, point in enumerate(tcx_points[:3]):
-        print(f"  点 {i+1}: 时间={point['time']}, 位置=({point['latitude']:.8f}, {point['longitude']:.8f}), 海拔={point['altitude']:.2f}m")
