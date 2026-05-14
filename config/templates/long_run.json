@@ -1,0 +1,12 @@
+{
+  "id": "long_run",
+  "name": "长距离跑",
+  "description": "长距离耐力训练",
+  "generation_config": {
+    "min_pace": 6.5,
+    "max_pace": 7.5,
+    "max_deviation_meters": 2.0,
+    "smooth_factor": 0.3,
+    "enable_pace_fluctuation": true
+  }
+}

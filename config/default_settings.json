@@ -1,0 +1,13 @@
+{
+  "default_track_id": "campus_default",
+  "default_pace_range": [7.0, 8.0],
+  "default_start_hour_range": [6, 8],
+  "weekend_factor": 1.5,
+  "rest_days_per_week": 1,
+  "points_per_km": 50,
+  "max_deviation_meters": 2.0,
+  "smooth_factor": 0.3,
+  "calories_per_km": 60.0,
+  "min_daily_km": 2.0,
+  "max_daily_km": 8.0
+}

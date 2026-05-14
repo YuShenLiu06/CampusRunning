@@ -1,0 +1,12 @@
+{
+  "id": "interval",
+  "name": "间歇跑",
+  "description": "间歇训练，配速变化较大",
+  "generation_config": {
+    "min_pace": 5.5,
+    "max_pace": 8.0,
+    "max_deviation_meters": 1.5,
+    "smooth_factor": 0.2,
+    "enable_pace_fluctuation": true
+  }
+}

@@ -1,5 +1,6 @@
 # 排除输出目录
 output/
+final_test/
 wgs84_test_output/
 
 # 排除Python缓存文件

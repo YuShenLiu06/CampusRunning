@@ -1,0 +1,12 @@
+{
+  "id": "easy_run",
+  "name": "轻松跑",
+  "description": "轻松慢跑，适合恢复日",
+  "generation_config": {
+    "min_pace": 7.5,
+    "max_pace": 9.0,
+    "max_deviation_meters": 2.5,
+    "smooth_factor": 0.4,
+    "enable_pace_fluctuation": true
+  }
+}
