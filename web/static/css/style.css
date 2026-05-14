@@ -1,0 +1,450 @@
+/* 全局样式 */
+:root {
+    --primary-color: #6366f1;
+    --primary-hover: #4f46e5;
+    --secondary-color: #ec4899;
+    --accent-color: #06b6d4;
+    --background-color: #f8fafc;
+    --card-background: #ffffff;
+    --text-color: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --success-color: #22c55e;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --border-radius: 12px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    color: var(--text-color);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+/* 头部样式 */
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+}
+
+header h1 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+header .subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    font-weight: 400;
+}
+
+/* 卡片样式 */
+.card {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+}
+
+/* 全局设置 */
+.global-settings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.setting-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.setting-item label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.setting-item select {
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.setting-item select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* 模式选择器 */
+.mode-selector h2 {
+    margin-bottom: 16px;
+    color: var(--text-color);
+    font-size: 1.25rem;
+}
+
+.mode-tabs {
+    display: flex;
+    gap: 8px;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 14px 20px;
+    border: 2px solid var(--border-color);
+    background: white;
+    color: var(--text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.tab-button:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.tab-button.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* 模式内容区域 */
+.mode-content {
+    display: none;
+}
+
+.mode-content.active {
+    display: block;
+}
+
+.mode-content h3 {
+    margin-bottom: 20px;
+    color: var(--text-color);
+    font-size: 1.1rem;
+}
+
+/* 表单样式 */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.form-group input,
+.form-group select {
+    padding: 12px 14px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--background-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.checkbox-item:hover {
+    background: #e2e8f0;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.checkbox-item label {
+    margin: 0;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+/* 按钮样式 */
+.btn-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn {
+    flex: 1;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-secondary {
+    background: white;
+    border: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.btn-secondary:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* 结果区域 */
+.results-section {
+    display: none;
+}
+
+.results-section.show {
+    display: block;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.results-header h3 {
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.results-table th,
+.results-table td {
+    padding: 12px 16px;
+    text-align: left;
+}
+
+.results-table th {
+    background: var(--background-color);
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.results-table tr:not(:last-child) td {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.results-table tr:hover td {
+    background: var(--background-color);
+}
+
+/* 消息提示 */
+.message {
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: none;
+}
+
+.message.show {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.message.success {
+    background: rgba(34, 197, 94, 0.1);
+    border-left: 4px solid var(--success-color);
+    color: var(--success-color);
+}
+
+.message.error {
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 4px solid var(--error-color);
+    color: var(--error-color);
+}
+
+.message.loading {
+    background: rgba(99, 102, 241, 0.1);
+    border-left: 4px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* 加载动画 */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(99, 102, 241, 0.2);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px 16px;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    .global-settings,
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mode-tabs {
+        flex-direction: column;
+    }
+
+    .checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-group {
+        flex-direction: column;
+    }
+
+    .results-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .results-table {
+        font-size: 0.875rem;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 10px 12px;
+    }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    animation: fadeIn 0.3s ease;
+}
+
+/* 页脚 */
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 20px;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}

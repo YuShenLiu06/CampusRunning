@@ -1,0 +1,311 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Web API路由
+
+作者: 猫娘幽浮喵
+"""
+
+import datetime
+import logging
+import os
+import uuid
+import zipfile
+from typing import Optional
+
+from flask import Flask, render_template, request, jsonify, send_file, abort
+
+from src.config_manager import ConfigManager
+from src.template_manager import TemplateManager
+from src.core.models import GenerationConfig, GenerationResult
+
+logger = logging.getLogger(__name__)
+
+# 全局状态
+_config_manager: Optional[ConfigManager] = None
+_template_manager: Optional[TemplateManager] = None
+_generation_jobs: dict = {}  # job_id -> results
+
+
+def create_app() -> Flask:
+    """创建并配置 Flask 应用
+
+    Returns:
+        配置好的 Flask 应用实例
+    """
+    global _config_manager, _template_manager
+
+    # 计算项目根目录（app.py 所在目录）
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    template_folder = os.path.join(project_root, "web", "templates")
+    static_folder = os.path.join(project_root, "web", "static")
+
+    app = Flask(
+        __name__,
+        template_folder=template_folder,
+        static_folder=static_folder,
+    )
+
+    _config_manager = ConfigManager(os.path.join(project_root, "config"))
+    _template_manager = TemplateManager(_config_manager)
+
+    # 注册路由
+    app.add_url_rule("/", "index", index)
+    app.add_url_rule("/api/tracks", "list_tracks", list_tracks, methods=["GET"])
+    app.add_url_rule(
+        "/api/tracks/<track_id>", "get_track", get_track, methods=["GET"]
+    )
+    app.add_url_rule(
+        "/api/templates", "list_templates", list_templates, methods=["GET"]
+    )
+    app.add_url_rule("/api/defaults", "get_defaults", get_defaults, methods=["GET"])
+    app.add_url_rule(
+        "/api/generate/daily", "generate_daily", generate_daily, methods=["POST"]
+    )
+    app.add_url_rule(
+        "/api/generate/total", "generate_total", generate_total, methods=["POST"]
+    )
+    app.add_url_rule(
+        "/api/generate/single", "generate_single", generate_single, methods=["POST"]
+    )
+    app.add_url_rule(
+        "/api/download/<job_id>", "download_files", download_files, methods=["GET"]
+    )
+
+    return app
+
+
+def index():
+    """渲染主页面"""
+    return render_template("index.html")
+
+
+def list_tracks():
+    """列出所有可用轨迹"""
+    tracks = []
+    for track_id in _config_manager.list_tracks():
+        try:
+            track = _config_manager.load_track(track_id)
+            from src.core.track_analyzer import TrackAnalyzer
+
+            analyzer = TrackAnalyzer(track.base_coordinates)
+            analysis = analyzer.analyze_track()
+            tracks.append({
+                "id": track.id,
+                "name": track.name,
+                "description": track.description,
+                "distance_meters": round(analysis.total_distance_meters, 1),
+                "lap_distance_km": round(analysis.total_distance_meters / 1000, 3),
+                "num_points": analysis.num_points,
+                "is_clockwise": analysis.is_clockwise,
+            })
+        except Exception as e:
+            logger.error("加载轨迹 %s 失败: %s", track_id, e)
+    return jsonify(tracks)
+
+
+def get_track(track_id):
+    """获取轨迹详情"""
+    try:
+        track = _config_manager.load_track(track_id)
+        return jsonify({
+            "id": track.id,
+            "name": track.name,
+            "description": track.description,
+            "num_points": len(track.base_coordinates),
+            "has_correction": track.coordinate_correction is not None,
+        })
+    except FileNotFoundError:
+        abort(404, description=f"轨迹 {track_id} 不存在")
+
+
+def list_templates():
+    """列出所有模板"""
+    templates = _template_manager.list_available()
+    return jsonify(templates)
+
+
+def get_defaults():
+    """获取默认设置"""
+    defaults = _config_manager.load_defaults()
+    return jsonify(defaults)
+
+
+def _parse_generate_request(data: dict) -> GenerationConfig:
+    """从请求体解析生成配置
+
+    Args:
+        data: 请求体字典
+
+    Returns:
+        生成配置对象
+    """
+    overrides = {
+        "min_pace": data.get("min_pace", 7.0),
+        "max_pace": data.get("max_pace", 8.0),
+        "start_hour_min": data.get("start_hour_min", 6),
+        "start_hour_max": data.get("start_hour_max", 8),
+        "output_dir": data.get("output_dir", "output"),
+        "include_track": data.get("include_track", True),
+        "apply_correction": data.get("apply_correction", True),
+        "enable_pace_fluctuation": data.get("enable_pace_fluctuation", True),
+    }
+    if "track_id" in data:
+        overrides["track_id"] = data["track_id"]
+
+    return _template_manager.apply_template(
+        template_id=data.get("template_id"),
+        overrides=overrides,
+    )
+
+
+def generate_daily():
+    """每日范围生成"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "无效的请求数据"}), 400
+
+    try:
+        config = _parse_generate_request(data)
+        start = datetime.datetime.strptime(data["start_date"], "%Y-%m-%d").date()
+        end = datetime.datetime.strptime(data["end_date"], "%Y-%m-%d").date()
+        min_km = float(data["min_km"])
+        max_km = float(data["max_km"])
+
+        from src.generation_engine import GenerationEngine
+
+        engine = GenerationEngine(_config_manager)
+        results = engine.generate_daily(start, end, min_km, max_km, config)
+
+        job_id = (
+            f"gen_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            f"_{uuid.uuid4().hex[:6]}"
+        )
+        _generation_jobs[job_id] = results
+
+        return jsonify({
+            "job_id": job_id,
+            "status": "complete",
+            "total_files": len(results),
+            "files": [_result_to_dict(r) for r in results],
+            "download_url": f"/api/download/{job_id}",
+        })
+    except Exception as e:
+        logger.error("生成失败: %s", e, exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+
+def generate_total():
+    """总公里数生成"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "无效的请求数据"}), 400
+
+    try:
+        config = _parse_generate_request(data)
+        config.weekend_factor = data.get("weekend_factor", config.weekend_factor)
+        config.rest_days_per_week = data.get(
+            "rest_days_per_week", config.rest_days_per_week
+        )
+        config.min_daily_km = data.get("min_daily_km", config.min_daily_km)
+        config.max_daily_km = data.get("max_daily_km", config.max_daily_km)
+
+        start = datetime.datetime.strptime(data["start_date"], "%Y-%m-%d").date()
+        end = datetime.datetime.strptime(data["end_date"], "%Y-%m-%d").date()
+        total_km = float(data["total_km"])
+
+        from src.generation_engine import GenerationEngine
+
+        engine = GenerationEngine(_config_manager)
+        results = engine.generate_total(start, end, total_km, config)
+
+        job_id = (
+            f"gen_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            f"_{uuid.uuid4().hex[:6]}"
+        )
+        _generation_jobs[job_id] = results
+
+        return jsonify({
+            "job_id": job_id,
+            "status": "complete",
+            "total_files": len(results),
+            "files": [_result_to_dict(r) for r in results],
+            "download_url": f"/api/download/{job_id}",
+        })
+    except Exception as e:
+        logger.error("生成失败: %s", e, exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+
+def generate_single():
+    """单文件生成"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "无效的请求数据"}), 400
+
+    try:
+        config = _parse_generate_request(data)
+        date = datetime.datetime.strptime(data["date"], "%Y-%m-%d").date()
+        distance = float(data["distance"])
+
+        from src.generation_engine import GenerationEngine
+
+        engine = GenerationEngine(_config_manager)
+        result = engine.generate_single(date, distance, config)
+
+        job_id = (
+            f"gen_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            f"_{uuid.uuid4().hex[:6]}"
+        )
+        _generation_jobs[job_id] = [result]
+
+        return jsonify({
+            "job_id": job_id,
+            "status": "complete",
+            "total_files": 1,
+            "files": [_result_to_dict(result)],
+            "download_url": f"/api/download/{job_id}",
+        })
+    except Exception as e:
+        logger.error("生成失败: %s", e, exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+
+def download_files(job_id):
+    """下载生成的文件"""
+    if job_id not in _generation_jobs:
+        return jsonify({"error": "任务不存在"}), 404
+
+    results = _generation_jobs[job_id]
+
+    if len(results) == 1:
+        return send_file(results[0].filepath, as_attachment=True)
+
+    # 多文件打包为 ZIP
+    zip_path = os.path.join(
+        os.path.dirname(results[0].filepath),
+        f"{job_id}.zip",
+    )
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        for r in results:
+            zf.write(r.filepath, os.path.basename(r.filepath))
+
+    return send_file(zip_path, as_attachment=True)
+
+
+def _result_to_dict(result: GenerationResult) -> dict:
+    """将生成结果转换为字典
+
+    Args:
+        result: 生成结果对象
+
+    Returns:
+        结果字典
+    """
+    return {
+        "filename": os.path.basename(result.filepath),
+        "date": result.date.strftime("%Y-%m-%d"),
+        "distance_km": result.distance_km,
+        "pace_min_per_km": result.pace_min_per_km,
+        "duration_seconds": result.duration_seconds,
+        "calories": result.calories,
+    }

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园跑步数据生成器</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>校园跑步数据生成器</h1>
+            <p class="subtitle">生成真实的跑步TCX数据 · 猫娘幽浮喵制作</p>
+        </header>
+
+        <!-- 全局设置 -->
+        <div class="card">
+            <div class="global-settings">
+                <div class="setting-item">
+                    <label>选择轨迹</label>
+                    <select id="track-select">
+                        <option value="campus_default">加载中...</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>预设模板</label>
+                    <select id="template-select">
+                        <option value="">不使用模板</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模式选择 -->
+        <div class="card mode-selector">
+            <h2>生成模式</h2>
+            <div class="mode-tabs">
+                <button class="tab-button active" data-mode="daily">每日公里数范围</button>
+                <button class="tab-button" data-mode="total">总公里数生成</button>
+                <button class="tab-button" data-mode="single">单个文件</button>
+            </div>
+        </div>
+
+        <!-- 每日模式 -->
+        <div id="daily-mode" class="card mode-content active">
+            <h3>按每日范围生成</h3>
+            <form id="daily-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>开始日期</label>
+                        <input type="date" id="daily-start-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>结束日期</label>
+                        <input type="date" id="daily-end-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>最低公里数</label>
+                        <input type="number" id="daily-min-km" step="0.1" min="0.1" value="2.0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>最高公里数</label>
+                        <input type="number" id="daily-max-km" step="0.1" min="0.1" value="5.0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>最快配速 (min/km)</label>
+                        <input type="number" id="daily-min-pace" step="0.1" min="1" value="7.0">
+                    </div>
+                    <div class="form-group">
+                        <label>最慢配速 (min/km)</label>
+                        <input type="number" id="daily-max-pace" step="0.1" min="1" value="8.0">
+                    </div>
+                    <div class="form-group">
+                        <label>最早开始时间 (时)</label>
+                        <input type="number" id="daily-start-hour-min" min="0" max="23" value="6">
+                    </div>
+                    <div class="form-group">
+                        <label>最晚开始时间 (时)</label>
+                        <input type="number" id="daily-start-hour-max" min="0" max="23" value="8">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>输出目录</label>
+                        <input type="text" id="daily-output-dir" value="output">
+                    </div>
+                </div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="daily-no-track">
+                        <label for="daily-no-track">不含轨迹点</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="daily-no-correction">
+                        <label for="daily-no-correction">不修正坐标</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="daily-no-fluctuation">
+                        <label for="daily-no-fluctuation">恒定配速</label>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">开始生成</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 总公里数模式 -->
+        <div id="total-mode" class="card mode-content">
+            <h3>按总公里数生成</h3>
+            <form id="total-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>开始日期</label>
+                        <input type="date" id="total-start-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>结束日期</label>
+                        <input type="date" id="total-end-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>目标总公里数</label>
+                        <input type="number" id="total-km" step="0.1" min="0.1" value="50" required>
+                    </div>
+                    <div class="form-group">
+                        <label>周末系数</label>
+                        <input type="number" id="total-weekend-factor" step="0.1" min="0.1" value="1.5">
+                    </div>
+                    <div class="form-group">
+                        <label>每日最低 (km)</label>
+                        <input type="number" id="total-min-daily" step="0.1" min="0.1" value="2.0">
+                    </div>
+                    <div class="form-group">
+                        <label>每日最高 (km)</label>
+                        <input type="number" id="total-max-daily" step="0.1" min="0.1" value="8.0">
+                    </div>
+                    <div class="form-group">
+                        <label>每周休息天数</label>
+                        <input type="number" id="total-rest-days" min="0" max="7" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>最快配速 (min/km)</label>
+                        <input type="number" id="total-min-pace" step="0.1" min="1" value="7.0">
+                    </div>
+                    <div class="form-group">
+                        <label>最慢配速 (min/km)</label>
+                        <input type="number" id="total-max-pace" step="0.1" min="1" value="8.0">
+                    </div>
+                    <div class="form-group">
+                        <label>输出目录</label>
+                        <input type="text" id="total-output-dir" value="output">
+                    </div>
+                </div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="total-no-track">
+                        <label for="total-no-track">不含轨迹点</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="total-no-correction">
+                        <label for="total-no-correction">不修正坐标</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="total-no-fluctuation">
+                        <label for="total-no-fluctuation">恒定配速</label>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">开始生成</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 单文件模式 -->
+        <div id="single-mode" class="card mode-content">
+            <h3>生成单个文件</h3>
+            <form id="single-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="single-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>距离 (km)</label>
+                        <input type="number" id="single-distance" step="0.1" min="0.1" value="3.0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>配速 (min/km，留空随机)</label>
+                        <input type="number" id="single-pace" step="0.1" min="1" placeholder="留空随机">
+                    </div>
+                    <div class="form-group">
+                        <label>开始时间 (时)</label>
+                        <input type="number" id="single-start-hour" min="0" max="23" value="7">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>输出目录</label>
+                        <input type="text" id="single-output-dir" value="output">
+                    </div>
+                </div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="single-no-track">
+                        <label for="single-no-track">不含轨迹点</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="single-no-correction">
+                        <label for="single-no-correction">不修正坐标</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="single-no-fluctuation">
+                        <label for="single-no-fluctuation">恒定配速</label>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">开始生成</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 结果区域 -->
+        <div id="results-section" class="card results-section">
+            <div class="results-header">
+                <h3>生成结果</h3>
+                <button id="download-btn" class="btn btn-primary" disabled>下载文件</button>
+            </div>
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>距离</th>
+                        <th>配速</th>
+                        <th>时长</th>
+                        <th>卡路里</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 消息提示 -->
+        <div id="message" class="message"></div>
+
+        <footer>
+            <p>校园跑步数据生成器 · 由 <a href="#">猫娘幽浮喵</a> 制作</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
