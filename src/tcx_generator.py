@@ -21,9 +21,10 @@ from .track_generator import TrackGenerator
 class TCXGenerator:
     """TCX文件生成器类"""
     
-    def __init__(self, apply_coordinate_correction: bool = True):
+    def __init__(self, apply_coordinate_correction: bool = True, enable_pace_fluctuation: bool = True):
         self.namespace = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
         self.xsi = "http://www.w3.org/2001/XMLSchema-instance"
+        self.enable_pace_fluctuation = enable_pace_fluctuation
         self.track_generator = TrackGenerator(apply_correction=apply_coordinate_correction)
         
     def generate_date_range(self, start_date: str, end_date: str) -> List[datetime.date]:
@@ -170,8 +171,10 @@ class TCXGenerator:
         if include_track:
             # 生成轨迹点
             track_points = self.track_generator.generate_smooth_track(distance_km)
+            # 计算平均配速
+            avg_pace = duration_seconds / 60 / distance_km
             tcx_trackpoints = self.track_generator.generate_tcx_trackpoints(
-                track_points, start_time, duration_seconds
+                track_points, start_time, duration_seconds, avg_pace, enable_pace_fluctuation=self.enable_pace_fluctuation
             )
             
             # 构建轨迹XML

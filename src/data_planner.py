@@ -20,8 +20,11 @@ from .tcx_generator import TCXGenerator
 class DataPlanner:
     """数据规划器类"""
     
-    def __init__(self, apply_coordinate_correction: bool = True):
-        self.tcx_generator = TCXGenerator(apply_coordinate_correction=apply_coordinate_correction)
+    def __init__(self, apply_coordinate_correction: bool = True, enable_pace_fluctuation: bool = True):
+        self.tcx_generator = TCXGenerator(
+            apply_coordinate_correction=apply_coordinate_correction,
+            enable_pace_fluctuation=enable_pace_fluctuation
+        )
         
     def generate_running_plan(self, start_date: str, end_date: str, 
                            total_km: float, min_daily_km: float = 2.0,

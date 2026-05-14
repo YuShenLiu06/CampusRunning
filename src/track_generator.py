@@ -18,6 +18,7 @@ import datetime
 from typing import List, Tuple
 from .track_analyzer import TrackAnalyzer
 from .coordinate_corrector import CoordinateCorrector
+from .pace_fluctuator import PaceFluctuator
 
 
 class TrackGenerator:
@@ -46,6 +47,9 @@ class TrackGenerator:
             # 更新中心点
             self.center = self.corrector.correct_coordinate(self.center[0], self.center[1])
             print("坐标修正已应用到基础轨迹")
+        
+        # 配速波动器（初始化为None，在需要时创建）
+        self.pace_fluctuator = None
         
     def generate_smooth_track(self, target_distance_km: float, 
                              points_per_km: int = 50,
@@ -261,8 +265,10 @@ class TrackGenerator:
         
         return smoothed_points
     
-    def generate_tcx_trackpoints(self, track_points: List[Tuple[float, float]], 
-                                start_time: datetime.datetime, duration_seconds: float) -> List[dict]:
+    def generate_tcx_trackpoints(self, track_points: List[Tuple[float, float]],
+                                start_time: datetime.datetime, duration_seconds: float,
+                                base_pace_min_per_km: float = None,
+                                enable_pace_fluctuation: bool = True) -> List[dict]:
         """
         生成TCX格式的轨迹点
         
@@ -270,6 +276,8 @@ class TrackGenerator:
             track_points: 轨迹点列表
             start_time: 开始时间（datetime对象）
             duration_seconds: 总时长（秒）
+            base_pace_min_per_km: 基础配速（分钟/公里），如果为None则使用均匀时间分布
+            enable_pace_fluctuation: 是否启用配速波动
             
         Returns:
             TCX轨迹点字典列表
@@ -277,29 +285,83 @@ class TrackGenerator:
         if not track_points:
             return []
         
-        # 计算每点之间的时间间隔
-        time_interval = duration_seconds / len(track_points)
-        
-        trackpoints = []
-        
-        for i, (lon, lat) in enumerate(track_points):
-            # 计算当前点的时间
-            point_time = start_time + datetime.timedelta(seconds=i * time_interval)
-            # 使用本地时间，不加Z后缀
-            point_time_str = point_time.strftime("%Y-%m-%dT%H:%M:%S")
+        # 如果启用配速波动且提供了基础配速
+        if enable_pace_fluctuation and base_pace_min_per_km is not None:
+            # 创建配速波动器
+            if self.pace_fluctuator is None or self.pace_fluctuator.base_pace != base_pace_min_per_km:
+                self.pace_fluctuator = PaceFluctuator(base_pace_min_per_km)
             
-            # 计算海拔（模拟值，基于到中心的距离）
-            distance_to_center = self.analyzer.calculate_distance(self.center, (lon, lat))
-            altitude = 100 + (distance_to_center - self.base_analysis['approximate_radius_meters']) * 0.1
+            # 生成配速曲线
+            pace_profile = self.pace_fluctuator.generate_pace_profile(len(track_points))
             
-            trackpoint = {
-                "time": point_time_str,
-                "latitude": lat,
-                "longitude": lon,
-                "altitude": altitude,
-                "distance_meters": i * (self.base_distance / len(track_points))
-            }
+            # 计算每段距离
+            segment_distances = []
+            for i in range(len(track_points) - 1):
+                distance = self.analyzer.calculate_distance(track_points[i], track_points[i + 1])
+                segment_distances.append(distance / 1000)  # 转换为公里
             
-            trackpoints.append(trackpoint)
-        
-        return trackpoints
+            # 计算每段的时间
+            segment_times = self.pace_fluctuator.generate_segment_times(pace_profile[:-1], segment_distances)
+            
+            # 生成轨迹点
+            trackpoints = []
+            current_time = start_time
+            
+            for i, (lon, lat) in enumerate(track_points):
+                # 使用本地时间，不加Z后缀
+                point_time_str = current_time.strftime("%Y-%m-%dT%H:%M:%S")
+                
+                # 计算海拔（模拟值，基于到中心的距离）
+                distance_to_center = self.analyzer.calculate_distance(self.center, (lon, lat))
+                altitude = 100 + (distance_to_center - self.base_analysis['approximate_radius_meters']) * 0.1
+                
+                # 计算累计距离
+                if i == 0:
+                    cumulative_distance = 0
+                else:
+                    # 使用实际计算的距离而不是线性插值
+                    cumulative_distance = sum(self.analyzer.calculate_distance(
+                        track_points[j], track_points[j+1]) for j in range(i))
+                
+                trackpoint = {
+                    "time": point_time_str,
+                    "latitude": lat,
+                    "longitude": lon,
+                    "altitude": altitude,
+                    "distance_meters": cumulative_distance
+                }
+                
+                trackpoints.append(trackpoint)
+                
+                # 更新当前时间（除了最后一个点）
+                if i < len(track_points) - 1:
+                    current_time += datetime.timedelta(seconds=segment_times[i])
+            
+            return trackpoints
+        else:
+            # 原有的均匀时间分布逻辑
+            time_interval = duration_seconds / len(track_points)
+            
+            trackpoints = []
+            
+            for i, (lon, lat) in enumerate(track_points):
+                # 计算当前点的时间
+                point_time = start_time + datetime.timedelta(seconds=i * time_interval)
+                # 使用本地时间，不加Z后缀
+                point_time_str = point_time.strftime("%Y-%m-%dT%H:%M:%S")
+                
+                # 计算海拔（模拟值，基于到中心的距离）
+                distance_to_center = self.analyzer.calculate_distance(self.center, (lon, lat))
+                altitude = 100 + (distance_to_center - self.base_analysis['approximate_radius_meters']) * 0.1
+                
+                trackpoint = {
+                    "time": point_time_str,
+                    "latitude": lat,
+                    "longitude": lon,
+                    "altitude": altitude,
+                    "distance_meters": i * (self.base_distance / len(track_points))
+                }
+                
+                trackpoints.append(trackpoint)
+            
+            return trackpoints
