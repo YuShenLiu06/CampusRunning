@@ -17,6 +17,7 @@ from flask import Flask, render_template, request, jsonify, send_file, abort
 from src.config_manager import ConfigManager
 from src.template_manager import TemplateManager
 from src.core.models import GenerationConfig, GenerationResult
+from src.core.track_analyzer import TrackAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,45 @@ logger = logging.getLogger(__name__)
 _config_manager: Optional[ConfigManager] = None
 _template_manager: Optional[TemplateManager] = None
 _generation_jobs: dict = {}  # job_id -> results
+_tracks_cache: Optional[list[dict]] = None  # 轨迹分析缓存
+
+
+def _ensure_tracks_cache() -> list[dict]:
+    """确保轨迹缓存已初始化（延迟初始化模式）
+
+    Returns:
+        缓存的轨迹列表
+    """
+    global _tracks_cache
+    if _tracks_cache is None:
+        _init_tracks_cache()
+    return _tracks_cache
+
+
+def _init_tracks_cache() -> None:
+    """初始化轨迹缓存 - 预计算所有轨迹的分析结果"""
+    global _tracks_cache
+    if _config_manager is None:
+        logger.warning("配置管理器未初始化，跳过缓存初始化")
+        return
+    _tracks_cache = []
+    for track_id in _config_manager.list_tracks():
+        try:
+            track = _config_manager.load_track(track_id)
+            analyzer = TrackAnalyzer(track.base_coordinates)
+            analysis = analyzer.analyze_track()
+            _tracks_cache.append({
+                "id": track.id,
+                "name": track.name,
+                "description": track.description,
+                "distance_meters": round(analysis.total_distance_meters, 1),
+                "lap_distance_km": round(analysis.total_distance_meters / 1000, 3),
+                "num_points": analysis.num_points,
+                "is_clockwise": analysis.is_clockwise,
+            })
+        except Exception as e:
+            logger.error("缓存轨迹 %s 失败: %s", track_id, e)
+    logger.info("轨迹缓存初始化完成，共 %d 条", len(_tracks_cache))
 
 
 def create_app() -> Flask:
@@ -57,6 +97,9 @@ def create_app() -> Flask:
     app.add_url_rule(
         "/api/templates", "list_templates", list_templates, methods=["GET"]
     )
+    app.add_url_rule(
+        "/api/template/<template_id>", "get_template", get_template, methods=["GET"]
+    )
     app.add_url_rule("/api/defaults", "get_defaults", get_defaults, methods=["GET"])
     app.add_url_rule(
         "/api/generate/daily", "generate_daily", generate_daily, methods=["POST"]
@@ -80,27 +123,8 @@ def index():
 
 
 def list_tracks():
-    """列出所有可用轨迹"""
-    tracks = []
-    for track_id in _config_manager.list_tracks():
-        try:
-            track = _config_manager.load_track(track_id)
-            from src.core.track_analyzer import TrackAnalyzer
-
-            analyzer = TrackAnalyzer(track.base_coordinates)
-            analysis = analyzer.analyze_track()
-            tracks.append({
-                "id": track.id,
-                "name": track.name,
-                "description": track.description,
-                "distance_meters": round(analysis.total_distance_meters, 1),
-                "lap_distance_km": round(analysis.total_distance_meters / 1000, 3),
-                "num_points": analysis.num_points,
-                "is_clockwise": analysis.is_clockwise,
-            })
-        except Exception as e:
-            logger.error("加载轨迹 %s 失败: %s", track_id, e)
-    return jsonify(tracks)
+    """列出所有可用轨迹（使用缓存）"""
+    return jsonify(_ensure_tracks_cache())
 
 
 def get_track(track_id):
@@ -122,6 +146,14 @@ def list_templates():
     """列出所有模板"""
     templates = _template_manager.list_available()
     return jsonify(templates)
+
+
+def get_template(template_id):
+    """获取模板详情（包含generation_config）"""
+    template = _template_manager.load_template(template_id)
+    if not template:
+        abort(404, description=f"模板 {template_id} 不存在")
+    return jsonify(template)
 
 
 def get_defaults():

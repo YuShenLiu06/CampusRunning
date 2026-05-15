@@ -72,9 +72,90 @@ async function loadTemplates() {
         const select = document.getElementById('template-select');
         select.innerHTML = '<option value="">不使用模板</option>' +
             templates.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+
+        // 监听模板选择变化
+        select.addEventListener('change', async (e) => {
+            const templateId = e.target.value;
+            if (!templateId) {
+                resetFormsToDefaults();
+                return;
+            }
+            try {
+                const resp = await fetch(`/api/template/${templateId}`);
+                if (!resp.ok) throw new Error('获取模板失败');
+                const template = await resp.json();
+                applyTemplateToForms(template);
+            } catch (error) {
+                showMessage('加载模板失败: ' + error.message, 'error');
+            }
+        });
     } catch (error) {
         showMessage('加载模板列表失败: ' + error.message, 'error');
     }
+}
+
+// 应用模板到表单
+function applyTemplateToForms(template) {
+    const config = template.generation_config || {};
+    if (!config) return;
+
+    // 每日模式字段
+    if (config.min_pace !== undefined) {
+        document.getElementById('daily-min-pace').value = config.min_pace;
+    }
+    if (config.max_pace !== undefined) {
+        document.getElementById('daily-max-pace').value = config.max_pace;
+    }
+    if (config.start_hour_min !== undefined) {
+        document.getElementById('daily-start-hour-min').value = config.start_hour_min;
+    }
+    if (config.start_hour_max !== undefined) {
+        document.getElementById('daily-start-hour-max').value = config.start_hour_max;
+    }
+
+    // 总公里数模式字段
+    if (config.min_pace !== undefined) {
+        document.getElementById('total-min-pace').value = config.min_pace;
+    }
+    if (config.max_pace !== undefined) {
+        document.getElementById('total-max-pace').value = config.max_pace;
+    }
+    if (config.start_hour_min !== undefined) {
+        document.getElementById('total-start-hour-min').value = config.start_hour_min;
+    }
+    if (config.start_hour_max !== undefined) {
+        document.getElementById('total-start-hour-max').value = config.start_hour_max;
+    }
+
+    // 处理恒定配速checkbox（模板的enable_pace_fluctuation是true表示启用，checkbox是checked表示禁用）
+    if (config.enable_pace_fluctuation !== undefined) {
+        document.getElementById('daily-no-fluctuation').checked = !config.enable_pace_fluctuation;
+        document.getElementById('total-no-fluctuation').checked = !config.enable_pace_fluctuation;
+    }
+    if (config.include_track !== undefined) {
+        document.getElementById('daily-no-track').checked = !config.include_track;
+    }
+    if (config.apply_correction !== undefined) {
+        document.getElementById('daily-no-correction').checked = !config.apply_correction;
+    }
+}
+
+// 重置表单为默认值
+function resetFormsToDefaults() {
+    // 每日模式默认值
+    document.getElementById('daily-min-pace').value = 7.0;
+    document.getElementById('daily-max-pace').value = 8.0;
+    document.getElementById('daily-start-hour-min').value = 6;
+    document.getElementById('daily-start-hour-max').value = 8;
+    document.getElementById('daily-no-track').checked = false;
+    document.getElementById('daily-no-correction').checked = false;
+    document.getElementById('daily-no-fluctuation').checked = false;
+
+    // 总公里数模式默认值
+    document.getElementById('total-min-pace').value = 7.0;
+    document.getElementById('total-max-pace').value = 8.0;
+    document.getElementById('total-start-hour-min').value = 6;
+    document.getElementById('total-start-hour-max').value = 8;
 }
 
 // 初始化表单提交
@@ -146,10 +227,9 @@ function collectTotalFormData() {
         rest_days_per_week: parseInt(document.getElementById('total-rest-days').value),
         min_pace: parseFloat(document.getElementById('total-min-pace').value),
         max_pace: parseFloat(document.getElementById('total-max-pace').value),
+        start_hour_min: parseInt(document.getElementById('total-start-hour-min').value),
+        start_hour_max: parseInt(document.getElementById('total-start-hour-max').value),
         output_dir: document.getElementById('total-output-dir').value,
-        include_track: !document.getElementById('total-no-track').checked,
-        apply_correction: !document.getElementById('total-no-correction').checked,
-        enable_pace_fluctuation: !document.getElementById('total-no-fluctuation').checked,
     };
 }
 

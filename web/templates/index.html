@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>校园跑步数据生成器</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
 </head>
 <body>
     <div class="container">
@@ -85,21 +85,7 @@
                         <input type="text" id="daily-output-dir" value="output">
                     </div>
                 </div>
-                <div class="checkbox-grid">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="daily-no-track">
-                        <label for="daily-no-track">不含轨迹点</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="daily-no-correction">
-                        <label for="daily-no-correction">不修正坐标</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="daily-no-fluctuation">
-                        <label for="daily-no-fluctuation">恒定配速</label>
-                    </div>
-                </div>
-                <div class="btn-group">
+                                <div class="btn-group">
                     <button type="submit" class="btn btn-primary">开始生成</button>
                 </div>
             </form>
@@ -147,22 +133,16 @@
                         <input type="number" id="total-max-pace" step="0.1" min="1" value="8.0">
                     </div>
                     <div class="form-group">
+                        <label>最早开始时间 (时)</label>
+                        <input type="number" id="total-start-hour-min" min="0" max="23" value="6">
+                    </div>
+                    <div class="form-group">
+                        <label>最晚开始时间 (时)</label>
+                        <input type="number" id="total-start-hour-max" min="0" max="23" value="8">
+                    </div>
+                    <div class="form-group">
                         <label>输出目录</label>
                         <input type="text" id="total-output-dir" value="output">
-                    </div>
-                </div>
-                <div class="checkbox-grid">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="total-no-track">
-                        <label for="total-no-track">不含轨迹点</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="total-no-correction">
-                        <label for="total-no-correction">不修正坐标</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="total-no-fluctuation">
-                        <label for="total-no-fluctuation">恒定配速</label>
                     </div>
                 </div>
                 <div class="btn-group">
@@ -197,21 +177,7 @@
                         <input type="text" id="single-output-dir" value="output">
                     </div>
                 </div>
-                <div class="checkbox-grid">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="single-no-track">
-                        <label for="single-no-track">不含轨迹点</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="single-no-correction">
-                        <label for="single-no-correction">不修正坐标</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="single-no-fluctuation">
-                        <label for="single-no-fluctuation">恒定配速</label>
-                    </div>
-                </div>
-                <div class="btn-group">
+                                <div class="btn-group">
                     <button type="submit" class="btn btn-primary">开始生成</button>
                 </div>
             </form>
@@ -242,7 +208,7 @@
         <div id="message" class="message"></div>
 
         <footer>
-            <p>校园跑步数据生成器 · 由 <a href="#">猫娘幽浮喵</a> 制作</p>
+            <p>校园跑步数据生成器</p>
         </footer>
     </div>
 

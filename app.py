@@ -5,7 +5,9 @@
 作者: 猫娘幽浮喵
 """
 
+import json
 import logging
+import os
 import sys
 
 try:
@@ -17,6 +19,23 @@ except ImportError:
 from web.routes import create_app
 
 
+def load_web_config() -> tuple[str, int]:
+    """从配置文件加载Web服务配置
+
+    Returns:
+        (host, port) 元组
+    """
+    config_path = os.path.join(os.path.dirname(__file__), "config", "default_settings.json")
+    if os.path.isfile(config_path):
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+        host = config.get("web_host", "0.0.0.0")
+        port = config.get("web_port", 5000)
+        logging.info("Web配置已加载: host=%s, port=%d", host, port)
+        return host, port
+    return "0.0.0.0", 5000
+
+
 def main():
     logging.basicConfig(
         level=logging.INFO,
@@ -25,14 +44,16 @@ def main():
     )
 
     app = create_app()
+    host, port = load_web_config()
 
     print("=" * 50)
     print("校园跑步数据生成器 - Web界面")
-    print("访问 http://127.0.0.1:5000")
+    print(f"局域网访问 http://<本机IP>:{port}")
+    print(f"本机访问 http://127.0.0.1:{port}")
     print("按 Ctrl+C 停止服务器")
     print("=" * 50)
 
-    app.run(debug=True, host="127.0.0.1", port=5000)
+    app.run(debug=True, host=host, port=port)
 
 
 if __name__ == "__main__":
