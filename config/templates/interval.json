@@ -2,6 +2,7 @@
   "id": "interval",
   "name": "间歇跑",
   "description": "间歇训练，配速变化较大",
+  "track_id": "",
   "generation_config": {
     "min_pace": 5.5,
     "max_pace": 8.0,

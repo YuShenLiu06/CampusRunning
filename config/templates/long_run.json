@@ -2,6 +2,7 @@
   "id": "long_run",
   "name": "长距离跑",
   "description": "长距离耐力训练",
+  "track_id": "",
   "generation_config": {
     "min_pace": 6.5,
     "max_pace": 7.5,

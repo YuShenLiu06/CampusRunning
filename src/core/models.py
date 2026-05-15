@@ -212,6 +212,8 @@ class GenerationConfig:
         min_daily_km: 每日最小里程（公里）
         max_daily_km: 每日最大里程（公里）
         calories_per_km: 每公里消耗卡路里
+        start_date: 可选的默认开始日期
+        end_date: 可选的默认结束日期
     """
     track_id: str = "campus_default"
     min_pace: float = 7.0
@@ -231,3 +233,5 @@ class GenerationConfig:
     min_daily_km: float = 2.0
     max_daily_km: float = 8.0
     calories_per_km: float = 60.0
+    start_date: Optional[datetime.date] = None
+    end_date: Optional[datetime.date] = None

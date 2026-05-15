@@ -28,7 +28,9 @@
                     <label>预设模板</label>
                     <select id="template-select">
                         <option value="">不使用模板</option>
+                        <option value="__upload__">上传模板...</option>
                     </select>
+                    <input type="file" id="template-upload" accept=".json" style="display:none">
                 </div>
             </div>
         </div>
@@ -87,6 +89,7 @@
                 </div>
                                 <div class="btn-group">
                     <button type="submit" class="btn btn-primary">开始生成</button>
+                    <button type="button" id="daily-export-btn" class="btn btn-secondary">导出模板</button>
                 </div>
             </form>
         </div>
@@ -147,6 +150,7 @@
                 </div>
                 <div class="btn-group">
                     <button type="submit" class="btn btn-primary">开始生成</button>
+                    <button type="button" id="total-export-btn" class="btn btn-secondary">导出模板</button>
                 </div>
             </form>
         </div>
@@ -179,6 +183,7 @@
                 </div>
                                 <div class="btn-group">
                     <button type="submit" class="btn btn-primary">开始生成</button>
+                    <button type="button" id="single-export-btn" class="btn btn-secondary">导出模板</button>
                 </div>
             </form>
         </div>
@@ -206,6 +211,24 @@
 
         <!-- 消息提示 -->
         <div id="message" class="message"></div>
+
+        <!-- 导出模板模态框 -->
+        <div id="export-modal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close">&times;</span>
+                <h3>导出模板</h3>
+                <form id="export-form">
+                    <div class="form-group">
+                        <label>模板名称</label>
+                        <input type="text" id="export-template-name" required>
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">导出</button>
+                        <button type="button" class="btn btn-secondary modal-cancel">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <footer>
             <p>校园跑步数据生成器</p>

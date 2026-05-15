@@ -100,6 +100,9 @@ def create_app() -> Flask:
     app.add_url_rule(
         "/api/template/<template_id>", "get_template", get_template, methods=["GET"]
     )
+    app.add_url_rule(
+        "/api/template", "create_template", create_template, methods=["POST"]
+    )
     app.add_url_rule("/api/defaults", "get_defaults", get_defaults, methods=["GET"])
     app.add_url_rule(
         "/api/generate/daily", "generate_daily", generate_daily, methods=["POST"]
@@ -154,6 +157,27 @@ def get_template(template_id):
     if not template:
         abort(404, description=f"模板 {template_id} 不存在")
     return jsonify(template)
+
+
+def create_template():
+    """创建新模板"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "无效的请求数据"}), 400
+
+    name = data.get("name")
+    description = data.get("description", "")
+    generation_config = data.get("generation_config", {})
+
+    if not name:
+        return jsonify({"error": "模板名称不能为空"}), 400
+
+    try:
+        result = _template_manager.save_template(name, description, generation_config)
+        return jsonify(result), 201
+    except Exception as e:
+        logger.error("创建模板失败: %s", e, exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 
 def get_defaults():

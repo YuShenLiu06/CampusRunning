@@ -9,6 +9,7 @@
 import json
 import logging
 import os
+import uuid
 from typing import Optional
 
 from src.config_manager import ConfigManager
@@ -88,6 +89,47 @@ class TemplateManager:
         logger.info("加载模板: %s (%s)", data["name"], data["id"])
         return data
 
+    def save_template(
+        self,
+        name: str,
+        description: str,
+        generation_config: dict,
+    ) -> dict:
+        """保存模板到文件
+
+        Args:
+            name: 模板名称
+            description: 模板描述
+            generation_config: 生成配置字典
+
+        Returns:
+            创建的模板信息，包含 id, name, description
+        """
+        # 生成唯一ID
+        template_id = f"custom_{uuid.uuid4().hex[:8]}"
+
+        template_data = {
+            "id": template_id,
+            "name": name,
+            "description": description,
+            "generation_config": generation_config,
+        }
+
+        # 确保目录存在
+        os.makedirs(self._templates_dir, exist_ok=True)
+
+        filepath = os.path.join(self._templates_dir, f"{template_id}.json")
+        with open(filepath, "w", encoding="utf-8") as fh:
+            json.dump(template_data, fh, ensure_ascii=False, indent=2)
+
+        logger.info("模板已保存: %s (%s)", name, template_id)
+
+        return {
+            "id": template_id,
+            "name": name,
+            "description": description,
+        }
+
     def apply_template(
         self,
         template_id: Optional[str] = None,
@@ -125,6 +167,8 @@ class TemplateManager:
             "min_daily_km": config_dict.min_daily_km,
             "max_daily_km": config_dict.max_daily_km,
             "calories_per_km": config_dict.calories_per_km,
+            "start_date": config_dict.start_date,
+            "end_date": config_dict.end_date,
         }
 
         # 应用模板
