@@ -144,20 +144,42 @@ python app.py
 
 ### 创建模板
 
-在 `config/templates/` 创建新JSON文件：
+模板用于保存和复用配置，支持多模式配置（每日范围/总公里数/单文件）。
 
+**在Web界面中创建：**
+1. 填写好表单配置
+2. 点击"导出模板"按钮
+3. 在弹出窗口中输入模板名称
+4. 点击"导出"下载 JSON 文件
+
+**在 config/templates/ 中创建：**
 ```json
 {
   "id": "my_template",
   "name": "我的模板",
   "description": "日常训练",
-  "generation_config": {
+  "track_id": "",
+  "daily_config": {
     "min_pace": 6.5,
     "max_pace": 7.5,
+    "min_km": 2.0,
+    "max_km": 5.0,
+    "enable_pace_fluctuation": true
+  },
+  "total_config": {
+    "min_pace": 6.5,
+    "max_pace": 7.5,
+    "total_km": 50,
+    "weekend_factor": 1.5,
+    "min_daily_km": 2.0,
+    "max_daily_km": 8.0,
+    "rest_days_per_week": 1,
     "enable_pace_fluctuation": true
   }
 }
 ```
+
+详细说明请参考 [模板创建指南](config/templates/TEMPLATE_GUIDE.md)。
 
 ## 文档
 

@@ -1,55 +1,131 @@
 # 模板创建指南
 
-## 模板位置
+## 概述
 
-模板文件存放在 `config/templates/` 目录下，每个模板是一个独立的 JSON 文件。
+模板用于保存和复用跑步数据生成配置。支持多模式配置，每种模式（每日范围/总公里数/单文件）有独立的配置节。
 
-## 模板结构
+## 模板格式
 
 ```json
 {
-  "id": "模板唯一ID",
+  "id": "template_unique_id",
   "name": "模板显示名称",
   "description": "模板描述",
-  "generation_config": {
-    // 生成配置项
+  "track_id": "轨迹ID（可选）",
+  "daily_config": {
+    "start_date": "2024-03-01",
+    "end_date": "2024-05-31",
+    "min_pace": 6.0,
+    "max_pace": 8.0,
+    "start_hour_min": 6,
+    "start_hour_max": 8,
+    "min_km": 2.0,
+    "max_km": 5.0,
+    "include_track": true,
+    "apply_correction": true,
+    "enable_pace_fluctuation": true
+  },
+  "total_config": {
+    "start_date": "2024-03-01",
+    "end_date": "2024-05-31",
+    "total_km": 50,
+    "weekend_factor": 1.5,
+    "min_daily_km": 2.0,
+    "max_daily_km": 8.0,
+    "rest_days_per_week": 1,
+    "min_pace": 6.0,
+    "max_pace": 8.0,
+    "start_hour_min": 6,
+    "start_hour_max": 8,
+    "include_track": true,
+    "apply_correction": true,
+    "enable_pace_fluctuation": true
+  },
+  "single_config": {
+    "pace": 6.5,
+    "include_track": true,
+    "apply_correction": true,
+    "enable_pace_fluctuation": true
   }
 }
 ```
 
 ## 配置参数说明
 
+### 通用参数
+
 | 参数 | 类型 | 说明 |
 |------|------|------|
+| `track_id` | string | 轨迹ID，对应轨迹选择下拉框 |
 | `min_pace` | float | 最快配速 (min/km)，越小越快 |
 | `max_pace` | float | 最慢配速 (min/km)，越大越慢 |
 | `start_hour_min` | int | 最早开始时间（小时） |
 | `start_hour_max` | int | 最晚开始时间（小时） |
-| `start_date` | string | 默认开始日期 (YYYY-MM-DD格式) |
-| `end_date` | string | 默认结束日期 (YYYY-MM-DD格式) |
+| `start_date` | string | 开始日期 (YYYY-MM-DD格式) |
+| `end_date` | string | 结束日期 (YYYY-MM-DD格式) |
 | `include_track` | bool | 是否包含轨迹点数据 |
 | `apply_correction` | bool | 是否应用坐标修正 |
 | `enable_pace_fluctuation` | bool | 是否启用配速波动 |
-| `max_deviation_meters` | float | 坐标修正最大偏移（米） |
-| `smooth_factor` | float | 轨迹平滑因子 (0.0-1.0) |
+
+### 每日模式 (daily_config)
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `min_km` | float | 每日最低公里数 |
+| `max_km` | float | 每日最高公里数 |
+
+### 总公里数模式 (total_config)
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `total_km` | float | 目标总公里数 |
 | `weekend_factor` | float | 周末跑步系数 |
-| `rest_days_per_week` | int | 每周休息天数 |
 | `min_daily_km` | float | 每日最低公里数 |
 | `max_daily_km` | float | 每日最高公里数 |
-| `calories_per_km` | float | 每公里消耗卡路里 |
-| `points_per_km` | int | 每公里轨迹点数 |
-| `create_zip` | bool | 是否创建ZIP压缩包 |
+| `rest_days_per_week` | int | 每周休息天数 |
 
-## 创建模板示例
+### 单文件模式 (single_config)
 
-### 1. 轻松跑模板
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `pace` | float | 指定配速 (min/km) |
+
+## 使用方式
+
+### Web界面导出/导入
+
+1. **导出模板**：
+   - 填写好表单配置
+   - 点击"导出模板"按钮
+   - 在弹出窗口中输入模板名称
+   - 点击"导出"下载 JSON 文件
+
+2. **导入模板**：
+   - 在预设模板下拉框中选择"上传模板..."
+   - 选择之前导出的 JSON 文件
+   - 模板将自动保存到浏览器本地缓存
+   - 刷新页面后本地模板会出现在下拉框中
+
+### 本地模板缓存
+
+导入的模板会自动保存在浏览器 localStorage 中。下次使用时无需重新上传，直接从"本地模板"分组中选择即可。
+
+如需清除本地模板，可在浏览器开发者工具的控制台执行：
+```javascript
+localStorage.removeItem('template_cache');
+```
+
+## 模板示例
+
+### 轻松跑模板
 
 ```json
 {
   "id": "easy_run",
   "name": "轻松跑",
   "description": "轻松慢跑，适合恢复日",
-  "generation_config": {
+  "track_id": "",
+  "daily_config": {
     "min_pace": 7.5,
     "max_pace": 9.0,
     "max_deviation_meters": 2.5,
@@ -59,56 +135,40 @@
 }
 ```
 
-### 2. 间歇跑模板
+### 间歇跑模板
 
 ```json
 {
   "id": "interval",
   "name": "间歇跑",
   "description": "高强度间歇训练",
-  "generation_config": {
+  "track_id": "",
+  "total_config": {
     "min_pace": 4.5,
     "max_pace": 5.5,
-    "enable_pace_fluctuation": false,
-    "max_deviation_meters": 1.0,
-    "smooth_factor": 0.2
+    "weekend_factor": 1.2,
+    "min_daily_km": 3.0,
+    "max_daily_km": 10.0,
+    "enable_pace_fluctuation": false
   }
 }
 ```
 
-### 3. 长距离跑模板
+### 长距离跑模板
 
 ```json
 {
   "id": "long_run",
   "name": "长距离跑",
   "description": "周末长距离训练",
-  "generation_config": {
+  "track_id": "",
+  "total_config": {
     "min_pace": 6.0,
     "max_pace": 7.5,
     "weekend_factor": 1.5,
-    "enable_pace_fluctuation": true,
-    "max_deviation_meters": 3.0,
-    "smooth_factor": 0.5
-  }
-}
-```
-
-### 4. 训练周期模板（带日期）
-
-```json
-{
-  "id": "spring_training",
-  "name": "春季训练计划",
-  "description": "3月1日至5月31日的春季训练",
-  "generation_config": {
-    "min_pace": 5.5,
-    "max_pace": 7.0,
-    "start_hour_min": 6,
-    "start_hour_max": 8,
-    "start_date": "2024-03-01",
-    "end_date": "2024-05-31",
-    "weekend_factor": 1.5,
+    "min_daily_km": 5.0,
+    "max_daily_km": 15.0,
+    "rest_days_per_week": 1,
     "enable_pace_fluctuation": true
   }
 }
@@ -116,40 +176,7 @@
 
 ## 注意事项
 
-1. **ID 唯一性**：每个模板的 `id` 必须唯一，不能与其他模板重复
-2. **文件命名**：建议文件名与 `id` 保持一致，如 `easy_run.json`
-3. **JSON 格式**：确保 JSON 格式正确，可使用在线 JSON 验证工具检查
-4. **数值范围**：
-   - `min_pace` 应小于 `max_pace`
-   - `smooth_factor` 建议在 0.0-0.5 之间
-   - `max_deviation_meters` 建议在 1.0-5.0 之间
-
-## 使用模板
-
-### 在Web界面中使用
-
-1. **选择模板**：在"预设模板"下拉框中选择相应模板即可自动加载配置
-2. **导入当前配置**：选择"导入当前配置"选项，可以将当前表单中的配置填充到模板选择中
-3. **创建新模板**：点击"生成模板"按钮，可以将当前表单配置保存为新模板
-
-### 通过API使用
-
-```bash
-# 获取模板列表
-curl http://localhost:5000/api/templates
-
-# 获取模板详情
-curl http://localhost:5000/api/template/easy_run
-
-# 创建新模板
-curl -X POST http://localhost:5000/api/template \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "我的模板",
-    "description": "自定义训练计划",
-    "generation_config": {
-      "min_pace": 6.0,
-      "max_pace": 8.0
-    }
-  }'
-```
+1. **ID 唯一性**：每个模板的 `id` 必须唯一
+2. **模式选择性**：可以只定义某一模式的配置，导入时会自动跳转到该模式
+3. **本地缓存**：模板保存在浏览器本地，切换浏览器或清除缓存后需要重新导入
+4. **文件格式**：JSON 格式必须正确，可使用 JSON 验证工具检查
