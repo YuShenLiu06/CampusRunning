@@ -38,6 +38,7 @@ Exporter (TCX)
 
 | 模块 | 职责 |
 |------|------|
+| `__init__.py` | 核心模块导出 |
 | `models.py` | 数据模型定义（GeoPoint, TrackDefinition, GenerationConfig等） |
 | `track_analyzer.py` | 轨迹分析（Haversine距离、Shoelace方向判定） |
 | `track_generator.py` | 轨迹生成（插值、随机偏移、平滑处理） |
@@ -49,6 +50,7 @@ Exporter (TCX)
 
 | 模块 | 职责 |
 |------|------|
+| `__init__.py` | 规划器模块导出 |
 | `daily_planner.py` | 每日范围规划（随机距离分配） |
 | `total_km_planner.py` | 总公里数规划（工作日/周末分离） |
 | `single_planner.py` | 单文件规划 |
@@ -57,6 +59,7 @@ Exporter (TCX)
 
 | 模块 | 职责 |
 |------|------|
+| `__init__.py` | 导出器模块导出 |
 | `base.py` | 抽象导出器接口 |
 | `tcx_exporter.py` | TCX格式导出实现 |
 

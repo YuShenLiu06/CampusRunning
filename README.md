@@ -43,19 +43,22 @@ campus_running_data_generation/
 │   └── default_settings.json  # 默认设置
 ├── src/                       # 源代码
 │   ├── core/                  # 核心模块
+│   │   ├── __init__.py
 │   │   ├── models.py         # 数据模型
-│   │   ├── track_analyzer.py
-│   │   ├── track_generator.py
-│   │   ├── pace_fluctuator.py
-│   │   ├── coordinate_corrector.py
-│   │   └── helpers.py
+│   │   ├── track_analyzer.py # 轨迹分析
+│   │   ├── track_generator.py # 轨迹生成
+│   │   ├── pace_fluctuator.py # 配速波动
+│   │   ├── coordinate_corrector.py # 坐标修正
+│   │   └── helpers.py        # 工具函数
 │   ├── planners/            # 规划策略
-│   │   ├── daily_planner.py
-│   │   ├── total_km_planner.py
-│   │   └── single_planner.py
+│   │   ├── __init__.py
+│   │   ├── daily_planner.py # 每日范围规划
+│   │   ├── total_km_planner.py # 总公里数规划
+│   │   └── single_planner.py # 单文件规划
 │   ├── exporters/            # 导出格式
-│   │   ├── base.py
-│   │   └── tcx_exporter.py
+│   │   ├── __init__.py
+│   │   ├── base.py          # 导出器基类
+│   │   └── tcx_exporter.py  # TCX导出
 │   ├── config_manager.py     # 配置管理
 │   ├── template_manager.py   # 模板管理
 │   └── generation_engine.py  # 生成引擎
