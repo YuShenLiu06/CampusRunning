@@ -1,0 +1,13 @@
+{
+  "id": "time_interval",
+  "name": "时间间歇跑",
+  "description": "时间模式的间歇跑训练，适合高强度训练",
+  "track_id": "",
+  "generation_config": {
+    "min_pace": 5.5,
+    "max_pace": 6.5,
+    "enable_pace_fluctuation": true,
+    "max_deviation_meters": 1.5,
+    "smooth_factor": 0.2
+  }
+}

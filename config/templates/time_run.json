@@ -1,0 +1,13 @@
+{
+  "id": "time_run",
+  "name": "时间跑",
+  "description": "按时间范围生成跑步数据，适合定时训练",
+  "track_id": "",
+  "generation_config": {
+    "min_pace": 7.0,
+    "max_pace": 8.0,
+    "enable_pace_fluctuation": true,
+    "max_deviation_meters": 2.0,
+    "smooth_factor": 0.3
+  }
+}
