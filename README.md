@@ -134,7 +134,7 @@ python app.py
 
 ### 添加新轨迹
 
-在 `config/tracks/` 创建新JSON文件：
+本项目使用**高德坐标系（GCJ-02）**，在 `config/tracks/` 创建新JSON文件：
 
 ```json
 {
@@ -150,6 +150,9 @@ python app.py
     "target_center": {"longitude": 106.6630, "latitude": 26.4482}
   }
 }
+```
+
+> **说明**：`coordinate_correction` 中的 `current_center` 是轨迹坐标的中心点，`target_center` 是该轨迹在地图上的实际位置中心。只需填入高德坐标的实际值，系统会自动处理偏移校正。
 ```
 
 ### 创建模板

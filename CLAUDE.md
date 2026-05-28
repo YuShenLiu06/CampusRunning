@@ -44,3 +44,9 @@ python app.py
 - 不可变数据模型 (`@dataclass(frozen=True)`)
 - 策略模式 (planners)
 - 依赖注入 (TrackGenerator)
+
+## 坐标系说明
+
+本项目使用**高德坐标系（GCJ-02）**。轨迹配置中的 `coordinate_correction` 定义从 `current_center`（轨迹坐标中心）到 `target_center`（实际位置中心）的偏移量。
+
+添加新轨迹时，只需填入高德坐标的实际值，系统会自动处理偏移校正，无需手动计算。
