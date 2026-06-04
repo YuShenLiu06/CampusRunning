@@ -486,9 +486,9 @@ function collectDailyFormData() {
         start_hour_min: parseInt(document.getElementById('daily-start-hour-min').value),
         start_hour_max: parseInt(document.getElementById('daily-start-hour-max').value),
         output_dir: document.getElementById('daily-output-dir').value,
-        include_track: !document.getElementById('daily-no-track').checked,
-        apply_correction: !document.getElementById('daily-no-correction').checked,
-        enable_pace_fluctuation: !document.getElementById('daily-no-fluctuation').checked,
+        include_track: !(document.getElementById('daily-no-track')?.checked ?? false),
+        apply_correction: !(document.getElementById('daily-no-correction')?.checked ?? false),
+        enable_pace_fluctuation: !(document.getElementById('daily-no-fluctuation')?.checked ?? false),
     };
 }
 
@@ -528,9 +528,9 @@ function collectSingleFormData() {
         distance: parseFloat(document.getElementById('single-distance').value),
         pace: pace ? parseFloat(pace) : undefined,
         output_dir: document.getElementById('single-output-dir').value,
-        include_track: !document.getElementById('single-no-track').checked,
-        apply_correction: !document.getElementById('single-no-correction').checked,
-        enable_pace_fluctuation: !document.getElementById('single-no-fluctuation').checked,
+        include_track: !(document.getElementById('single-no-track')?.checked ?? false),
+        apply_correction: !(document.getElementById('single-no-correction')?.checked ?? false),
+        enable_pace_fluctuation: !(document.getElementById('single-no-fluctuation')?.checked ?? false),
     };
 }
 
