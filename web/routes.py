@@ -198,8 +198,8 @@ def _parse_generate_request(data: dict) -> GenerationConfig:
     overrides = {
         "min_pace": data.get("min_pace", 7.0),
         "max_pace": data.get("max_pace", 8.0),
-        "start_hour_min": data.get("start_hour_min", 6),
-        "start_hour_max": data.get("start_hour_max", 8),
+        "start_time_min": data.get("start_time_min", "06:00"),
+        "start_time_max": data.get("start_time_max", "08:00"),
         "output_dir": data.get("output_dir", "output"),
         "include_track": data.get("include_track", True),
         "apply_correction": data.get("apply_correction", True),

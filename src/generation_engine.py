@@ -215,7 +215,7 @@ class GenerationEngine:
         duration = calculate_duration(distance_km, pace)
         start_time = generate_start_time(
             plan.date,
-            (config.start_hour_min, config.start_hour_max),
+            (config.start_time_min, config.start_time_max),
         )
         calories = calculate_calories(
             distance_km, duration, config.calories_per_km,

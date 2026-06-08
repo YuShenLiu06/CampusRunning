@@ -197,8 +197,8 @@ class GenerationConfig:
         track_id: 轨迹 ID
         min_pace: 最小配速（分钟/公里）
         max_pace: 最大配速（分钟/公里）
-        start_hour_min: 最早开始时间（小时）
-        start_hour_max: 最晚开始时间（小时）
+        start_time_min: 最早开始时间（"HH:MM" 格式）
+        start_time_max: 最晚开始时间（"HH:MM" 格式）
         output_dir: 输出目录
         include_track: 是否包含轨迹数据
         apply_correction: 是否应用坐标修正
@@ -218,8 +218,8 @@ class GenerationConfig:
     track_id: str = "campus_default"
     min_pace: float = 7.0
     max_pace: float = 8.0
-    start_hour_min: int = 6
-    start_hour_max: int = 8
+    start_time_min: str = "06:00"
+    start_time_max: str = "08:00"
     output_dir: str = "output"
     include_track: bool = True
     apply_correction: bool = True

@@ -130,6 +130,20 @@ class TemplateManager:
             "description": description,
         }
 
+    @staticmethod
+    def _migrate_time_fields(data: dict) -> None:
+        """将旧版 start_hour_min/max (int) 迁移为 start_time_min/max (str)
+
+        Args:
+            data: 待迁移的配置字典（原地修改）
+        """
+        if "start_hour_min" in data and "start_time_min" not in data:
+            hour = data.pop("start_hour_min")
+            data["start_time_min"] = f"{int(hour):02d}:00"
+        if "start_hour_max" in data and "start_time_max" not in data:
+            hour = data.pop("start_hour_max")
+            data["start_time_max"] = f"{int(hour):02d}:00"
+
     def apply_template(
         self,
         template_id: Optional[str] = None,
@@ -152,8 +166,8 @@ class TemplateManager:
             "track_id": config_dict.track_id,
             "min_pace": config_dict.min_pace,
             "max_pace": config_dict.max_pace,
-            "start_hour_min": config_dict.start_hour_min,
-            "start_hour_max": config_dict.start_hour_max,
+            "start_time_min": config_dict.start_time_min,
+            "start_time_max": config_dict.start_time_max,
             "output_dir": config_dict.output_dir,
             "include_track": config_dict.include_track,
             "apply_correction": config_dict.apply_correction,
@@ -176,6 +190,8 @@ class TemplateManager:
             template_data = self.load_template(template_id)
             if template_data and "generation_config" in template_data:
                 gen_config = template_data["generation_config"]
+                # 向后兼容：旧模板使用 start_hour_min/max (int)
+                self._migrate_time_fields(gen_config)
                 for key, value in gen_config.items():
                     if key in base_params:
                         base_params[key] = value
@@ -183,6 +199,8 @@ class TemplateManager:
 
         # 应用覆盖项
         if overrides:
+            # 向后兼容：旧覆盖项使用 start_hour_min/max (int)
+            self._migrate_time_fields(overrides)
             for key, value in overrides.items():
                 if key in base_params:
                     base_params[key] = value

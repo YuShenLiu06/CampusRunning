@@ -234,13 +234,23 @@ function applyTemplateToForms(template) {
         document.getElementById('daily-max-pace').value = config.max_pace;
         document.getElementById('total-max-pace').value = config.max_pace;
     }
-    if (config.start_hour_min !== undefined) {
-        document.getElementById('daily-start-hour-min').value = config.start_hour_min;
-        document.getElementById('total-start-hour-min').value = config.start_hour_min;
+    if (config.start_time_min !== undefined) {
+        document.getElementById('daily-start-time-min').value = config.start_time_min;
+        document.getElementById('total-start-time-min').value = config.start_time_min;
+    } else if (config.start_hour_min !== undefined) {
+        // 向后兼容旧模板
+        const minTime = String(config.start_hour_min).padStart(2, '0') + ':00';
+        document.getElementById('daily-start-time-min').value = minTime;
+        document.getElementById('total-start-time-min').value = minTime;
     }
-    if (config.start_hour_max !== undefined) {
-        document.getElementById('daily-start-hour-max').value = config.start_hour_max;
-        document.getElementById('total-start-hour-max').value = config.start_hour_max;
+    if (config.start_time_max !== undefined) {
+        document.getElementById('daily-start-time-max').value = config.start_time_max;
+        document.getElementById('total-start-time-max').value = config.start_time_max;
+    } else if (config.start_hour_max !== undefined) {
+        // 向后兼容旧模板
+        const maxTime = String(config.start_hour_max).padStart(2, '0') + ':00';
+        document.getElementById('daily-start-time-max').value = maxTime;
+        document.getElementById('total-start-time-max').value = maxTime;
     }
 
     // 处理恒定配速checkbox（模板的enable_pace_fluctuation是true表示启用，checkbox是checked表示禁用）
@@ -316,14 +326,14 @@ function resetFormsToDefaults() {
     // 每日模式默认值
     document.getElementById('daily-min-pace').value = 7.0;
     document.getElementById('daily-max-pace').value = 8.0;
-    document.getElementById('daily-start-hour-min').value = 6;
-    document.getElementById('daily-start-hour-max').value = 8;
+    document.getElementById('daily-start-time-min').value = '06:00';
+    document.getElementById('daily-start-time-max').value = '08:00';
 
     // 总公里数模式默认值
     document.getElementById('total-min-pace').value = 7.0;
     document.getElementById('total-max-pace').value = 8.0;
-    document.getElementById('total-start-hour-min').value = 6;
-    document.getElementById('total-start-hour-max').value = 8;
+    document.getElementById('total-start-time-min').value = '06:00';
+    document.getElementById('total-start-time-max').value = '08:00';
 }
 
 // 初始化表单提交
@@ -372,8 +382,8 @@ function doExportTemplate(name) {
         config = {
             min_pace: data.min_pace,
             max_pace: data.max_pace,
-            start_hour_min: data.start_hour_min,
-            start_hour_max: data.start_hour_max,
+            start_time_min: data.start_time_min,
+            start_time_max: data.start_time_max,
             start_date: data.start_date,
             end_date: data.end_date,
             min_km: data.min_km,
@@ -386,8 +396,8 @@ function doExportTemplate(name) {
         config = {
             min_pace: data.min_pace,
             max_pace: data.max_pace,
-            start_hour_min: data.start_hour_min,
-            start_hour_max: data.start_hour_max,
+            start_time_min: data.start_time_min,
+            start_time_max: data.start_time_max,
             start_date: data.start_date,
             end_date: data.end_date,
             total_km: data.total_km,
@@ -483,8 +493,8 @@ function collectDailyFormData() {
         max_km: parseFloat(document.getElementById('daily-max-km').value),
         min_pace: parseFloat(document.getElementById('daily-min-pace').value),
         max_pace: parseFloat(document.getElementById('daily-max-pace').value),
-        start_hour_min: parseInt(document.getElementById('daily-start-hour-min').value),
-        start_hour_max: parseInt(document.getElementById('daily-start-hour-max').value),
+        start_time_min: document.getElementById('daily-start-time-min').value || '06:00',
+        start_time_max: document.getElementById('daily-start-time-max').value || '08:00',
         output_dir: document.getElementById('daily-output-dir').value,
         include_track: !(document.getElementById('daily-no-track')?.checked ?? false),
         apply_correction: !(document.getElementById('daily-no-correction')?.checked ?? false),
@@ -509,8 +519,8 @@ function collectTotalFormData() {
         rest_days_per_week: parseInt(document.getElementById('total-rest-days').value),
         min_pace: parseFloat(document.getElementById('total-min-pace').value),
         max_pace: parseFloat(document.getElementById('total-max-pace').value),
-        start_hour_min: parseInt(document.getElementById('total-start-hour-min').value),
-        start_hour_max: parseInt(document.getElementById('total-start-hour-max').value),
+        start_time_min: document.getElementById('total-start-time-min').value || '06:00',
+        start_time_max: document.getElementById('total-start-time-max').value || '08:00',
         output_dir: document.getElementById('total-output-dir').value,
     };
 }
@@ -528,6 +538,8 @@ function collectSingleFormData() {
         distance: parseFloat(document.getElementById('single-distance').value),
         pace: pace ? parseFloat(pace) : undefined,
         output_dir: document.getElementById('single-output-dir').value,
+        start_time_min: document.getElementById('single-start-time').value || '07:00',
+        start_time_max: document.getElementById('single-start-time').value || '07:00',
         include_track: !(document.getElementById('single-no-track')?.checked ?? false),
         apply_correction: !(document.getElementById('single-no-correction')?.checked ?? false),
         enable_pace_fluctuation: !(document.getElementById('single-no-fluctuation')?.checked ?? false),

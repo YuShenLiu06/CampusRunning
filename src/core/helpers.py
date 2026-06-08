@@ -60,17 +60,28 @@ def calculate_calories(distance_km: float, duration_seconds: float,
 
 
 def generate_start_time(date: datetime.date,
-                        hour_range: tuple[int, int] = (6, 8)) -> datetime.datetime:
+                        time_range: tuple[str, str] = ("06:00", "08:00")) -> datetime.datetime:
     """生成随机开始时间
+
+    在指定的时间范围（精确到分钟）内随机生成一个开始时间。
 
     Args:
         date: 日期
-        hour_range: 开始时间范围（小时）
+        time_range: 开始时间范围（"HH:MM" 格式）
 
     Returns:
         随机开始时间
     """
-    hour = random.randint(hour_range[0], hour_range[1])
-    minute = random.randint(0, 59)
+    start_time = datetime.datetime.strptime(time_range[0], "%H:%M")
+    end_time = datetime.datetime.strptime(time_range[1], "%H:%M")
+
+    # 将时间转换为当天的分钟数以便随机
+    start_minutes = start_time.hour * 60 + start_time.minute
+    end_minutes = end_time.hour * 60 + end_time.minute
+
+    total_minutes = random.randint(start_minutes, end_minutes)
+    hour = total_minutes // 60
+    minute = total_minutes % 60
     second = random.randint(0, 59)
+
     return datetime.datetime.combine(date, datetime.time(hour, minute, second))

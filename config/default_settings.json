@@ -1,7 +1,7 @@
 {
   "default_track_id": "campus_default",
   "default_pace_range": [7.0, 8.0],
-  "default_start_hour_range": [6, 8],
+  "default_start_time_range": ["06:00", "08:00"],
   "weekend_factor": 1.5,
   "rest_days_per_week": 1,
   "points_per_km": 50,

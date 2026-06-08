@@ -50,8 +50,8 @@ def generate_by_daily_range(args, engine: GenerationEngine, template_manager: Te
     overrides = {
         "min_pace": args.min_pace,
         "max_pace": args.max_pace,
-        "start_hour_min": args.start_hour_min,
-        "start_hour_max": args.start_hour_max,
+        "start_time_min": args.start_time_min,
+        "start_time_max": args.start_time_max,
         "output_dir": args.output_dir,
         "include_track": not args.no_track,
         "apply_correction": not args.no_correction,
@@ -91,8 +91,8 @@ def generate_by_total_km(args, engine: GenerationEngine, template_manager: Templ
     overrides = {
         "min_pace": args.min_pace,
         "max_pace": args.max_pace,
-        "start_hour_min": args.start_hour_min,
-        "start_hour_max": args.start_hour_max,
+        "start_time_min": args.start_time_min,
+        "start_time_max": args.start_time_max,
         "output_dir": args.output_dir,
         "include_track": not args.no_track,
         "apply_correction": not args.no_correction,
@@ -153,6 +153,10 @@ def generate_single_file(args, engine: GenerationEngine, template_manager: Templ
         overrides["min_pace"] = args.pace
         overrides["max_pace"] = args.pace
 
+    # 单文件模式使用固定开始时间
+    overrides["start_time_min"] = args.start_time
+    overrides["start_time_max"] = args.start_time
+
     config = template_manager.apply_template(
         template_id=args.template,
         overrides=overrides
@@ -210,8 +214,8 @@ def main():
     daily_parser.add_argument('--max-km', type=float, required=True, help='最高公里数（周内基准）')
     daily_parser.add_argument('--min-pace', type=float, default=7.0, help='最快配速（分钟/公里） (默认: 7.0)')
     daily_parser.add_argument('--max-pace', type=float, default=8.0, help='最慢配速（分钟/公里） (默认: 8.0)')
-    daily_parser.add_argument('--start-hour-min', type=int, default=6, help='最早开始时间（小时） (默认: 6)')
-    daily_parser.add_argument('--start-hour-max', type=int, default=8, help='最晚开始时间（小时） (默认: 8)')
+    daily_parser.add_argument('--start-time-min', default='06:00', help='最早开始时间 (HH:MM) (默认: 06:00)')
+    daily_parser.add_argument('--start-time-max', default='08:00', help='最晚开始时间 (HH:MM) (默认: 08:00)')
     daily_parser.add_argument('--output-dir', default='output', help='输出目录 (默认: output)')
     daily_parser.add_argument('--no-track', action='store_true', help='不生成轨迹点')
     daily_parser.add_argument('--no-correction', action='store_true', help='不应用坐标修正')
@@ -231,8 +235,8 @@ def main():
     total_parser.add_argument('--rest-days-per-week', type=int, default=1, help='每周休息天数 (默认: 1)')
     total_parser.add_argument('--min-pace', type=float, default=7.0, help='最快配速（分钟/公里） (默认: 7.0)')
     total_parser.add_argument('--max-pace', type=float, default=8.0, help='最慢配速（分钟/公里） (默认: 8.0)')
-    total_parser.add_argument('--start-hour-min', type=int, default=6, help='最早开始时间（小时） (默认: 6)')
-    total_parser.add_argument('--start-hour-max', type=int, default=8, help='最晚开始时间（小时） (默认: 8)')
+    total_parser.add_argument('--start-time-min', default='06:00', help='最早开始时间 (HH:MM) (默认: 06:00)')
+    total_parser.add_argument('--start-time-max', default='08:00', help='最晚开始时间 (HH:MM) (默认: 08:00)')
     total_parser.add_argument('--output-dir', default='output', help='输出目录 (默认: output)')
     total_parser.add_argument('--no-track', action='store_true', help='不生成轨迹点')
     total_parser.add_argument('--no-correction', action='store_true', help='不应用坐标修正')
@@ -246,7 +250,7 @@ def main():
     single_parser.add_argument('--date', required=True, help='日期 (YYYY-MM-DD)')
     single_parser.add_argument('--distance', type=float, required=True, help='距离（公里）')
     single_parser.add_argument('--pace', type=float, help='配速（分钟/公里），如果不指定则随机生成')
-    single_parser.add_argument('--start-hour', type=int, default=7, help='开始时间（小时） (默认: 7)')
+    single_parser.add_argument('--start-time', default='07:00', help='开始时间 (HH:MM) (默认: 07:00)')
     single_parser.add_argument('--output-dir', default='output', help='输出目录 (默认: output)')
     single_parser.add_argument('--no-track', action='store_true', help='不生成轨迹点')
     single_parser.add_argument('--no-correction', action='store_true', help='不应用坐标修正')
